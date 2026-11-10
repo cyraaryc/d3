@@ -6,7 +6,7 @@ import { Presenter } from "./presenter.ts";
 import { Sounds } from "./sounds.ts";
 
 // Where everything is wired together, and the only file that knows every part.
-// Hexagonal Architecture (the core inside; keys, grid, HUD, sound, and tests around
+// Hexagonal Architecture (the core inside; keys , grid, HUD, sound, and tests around
 // it): https://alistair.cockburn.us/hexagonal-architecture
 
 // Choose another world with a URL like ?seed=7
