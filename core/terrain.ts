@@ -17,6 +17,30 @@ export function isPassable(terrain: Terrain): boolean {
   return terrain !== "water" && terrain !== "rock";
 }
 
+const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+/**
+ * Returns the letter at a world coordinate, or null if there is none.
+ * Letter placement is deterministic: the same seed and coordinates
+ * always produce the same result.
+ */
+export function letterAt(
+  seed: number,
+  x: number,
+  y: number,
+): string | null {
+  if (!isPassable(terrainAt(seed, x, y))) return null;
+
+  const chance = noise(seed + 3, x, y, 1);
+
+  // Only 8% of passable cells contain a letter.
+  if (chance >= 0.08) return null;
+
+  const index = Math.floor(noise(seed + 4, x, y, 1) * LETTERS.length);
+
+  return LETTERS[index];
+}
+
 // Value noise: random numbers at coarse grid points, blended between them, so
 // that terrain forms regions instead of static.
 function noise(seed: number, x: number, y: number, scale: number): number {

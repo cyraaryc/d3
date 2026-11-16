@@ -2,7 +2,7 @@
 // once, and the events it returns are a record of what happened. Whoever called
 // apply() decides how, or whether, to show them over time.
 
-import { isPassable, type Terrain, terrainAt } from "./terrain.ts";
+import { isPassable, letterAt, type Terrain, terrainAt } from "./terrain.ts";
 
 export type Cell = { x: number; y: number };
 
@@ -13,6 +13,9 @@ export type Direction = "north" | "south" | "east" | "west";
 export type GameState = {
   seed: number;
   player: Cell;
+  collectedCells: string[];
+  collectedLetters: string[];
+  craftedItems: string[];
 };
 
 // Command: https://gameprogrammingpatterns.com/command.html
@@ -21,7 +24,8 @@ export type Command = { type: "move"; direction: Direction };
 // Domain Event: https://martinfowler.com/eaaDev/DomainEvent.html
 export type GameEvent =
   | { type: "moved"; from: Cell; to: Cell }
-  | { type: "blocked"; at: Cell; toward: Cell; terrain: Terrain };
+  | { type: "blocked"; at: Cell; toward: Cell; terrain: Terrain }
+  | { type: "collected"; at: Cell; letter: string };
 
 const STEPS: Record<Direction, Cell> = {
   north: { x: 0, y: -1 },
@@ -32,7 +36,13 @@ const STEPS: Record<Direction, Cell> = {
 
 // Singleton, avoided on purpose: tests make as many games as they need. https://gameprogrammingpatterns.com/singleton.html
 export function newGame(seed: number): GameState {
-  return { seed, player: { x: 0, y: 0 } };
+  return {
+    seed,
+    player: { x: 0, y: 0 },
+    collectedCells: [],
+    collectedLetters: [],
+    craftedItems: [],
+  };
 }
 
 // The single way in. It updates the state it is given and returns the events.
@@ -57,5 +67,24 @@ function move(state: GameState, direction: Direction): GameEvent[] {
   }
   state.player.x = to.x;
   state.player.y = to.y;
-  return [{ type: "moved", from, to }];
+
+  const events: GameEvent[] = [{ type: "moved", from, to }];
+
+  const cellKey = `${to.x},${to.y}`;
+
+  if (!state.collectedCells.includes(cellKey)) {
+    const letter = letterAt(state.seed, to.x, to.y);
+
+    if (letter !== null) {
+      state.collectedCells.push(cellKey);
+      state.collectedLetters.push(letter);
+      events.push({
+        type: "collected",
+        at: { ...to },
+        letter,
+      });
+    }
+  }
+
+  return events;
 }

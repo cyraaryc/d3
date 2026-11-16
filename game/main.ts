@@ -20,6 +20,7 @@ const sounds = new Sounds(
 const grid = await startGridView(document.getElementById("grid")!, state);
 const presenter = new Presenter([grid, hud, sounds]);
 const controller = new Controller(state, presenter);
+controller.onSettled = () => hud.showInventory(state);
 
 // For poking at in the browser console, such as comparing logical state with
 // presentation state: game.state

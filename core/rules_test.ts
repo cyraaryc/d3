@@ -1,5 +1,11 @@
 import { assertEquals } from "@std/assert";
-import { apply, type GameState, isPassable, terrainAt } from "./mod.ts";
+import {
+  apply,
+  type GameState,
+  isPassable,
+  letterAt,
+  terrainAt,
+} from "./mod.ts";
 
 // Each test has a Given-When-Then shape: https://martinfowler.com/bliki/GivenWhenThen.html
 const SEED = 121;
@@ -10,9 +16,41 @@ function besideEasternCell(passable: boolean): GameState {
   for (let x = 2; x < 10_000; x++) {
     const here = isPassable(terrainAt(SEED, x, 0));
     const east = isPassable(terrainAt(SEED, x + 1, 0));
-    if (here && east === passable) return { seed: SEED, player: { x, y: 0 } };
+    if (
+      here &&
+      east === passable &&
+      (!passable || letterAt(SEED, x + 1, 0) === null)
+    ) {
+      return {
+        seed: SEED,
+        player: { x, y: 0 },
+        collectedCells: [],
+        collectedLetters: [],
+        craftedItems: [],
+      };
+    }
   }
   throw new Error("Found no suitable cell on this row.");
+}
+
+function besideEasternLetter(): GameState {
+  for (let x = 2; x < 10_000; x++) {
+    const here = isPassable(terrainAt(SEED, x, 0));
+    const currentLetter = letterAt(SEED, x, 0);
+    const eastLetter = letterAt(SEED, x + 1, 0);
+
+    if (here && currentLetter === null && eastLetter !== null) {
+      return {
+        seed: SEED,
+        player: { x, y: 0 },
+        collectedCells: [],
+        collectedLetters: [],
+        craftedItems: [],
+      };
+    }
+  }
+
+  throw new Error("Found no suitable letter cell on this row.");
 }
 
 Deno.test("moving onto passable terrain moves the player", () => {
@@ -66,4 +104,43 @@ Deno.test("an event keeps its cells while state moves on", () => {
     from: { x: x + 1, y },
     to: { x, y },
   }]);
+});
+
+Deno.test("moving onto a letter cell collects its letter", () => {
+  const state = besideEasternLetter();
+  const { x, y } = state.player;
+  const target = { x: x + 1, y };
+  const letter = letterAt(SEED, target.x, target.y);
+
+  const events = apply(state, { type: "move", direction: "east" });
+
+  assertEquals(letter !== null, true);
+  assertEquals(events, [
+    {
+      type: "moved",
+      from: { x, y },
+      to: target,
+    },
+    {
+      type: "collected",
+      at: target,
+      letter: letter!,
+    },
+  ]);
+  assertEquals(state.collectedLetters, [letter]);
+  assertEquals(state.collectedCells, [`${target.x},${target.y}`]);
+});
+
+Deno.test("the same letter cell cannot be collected twice", () => {
+  const state = besideEasternLetter();
+
+  apply(state, { type: "move", direction: "east" });
+  apply(state, { type: "move", direction: "west" });
+
+  const events = apply(state, { type: "move", direction: "east" });
+
+  assertEquals(events.length, 1);
+  assertEquals(events[0].type, "moved");
+  assertEquals(state.collectedLetters.length, 1);
+  assertEquals(state.collectedCells.length, 1);
 });

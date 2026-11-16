@@ -10,6 +10,8 @@ function describe(event: GameEvent): string {
       return `moved to ${event.to.x}, ${event.to.y}`;
     case "blocked":
       return `blocked by ${event.terrain} at ${event.toward.x}, ${event.toward.y}`;
+    case "collected":
+      return `collected letter ${event.letter}`;
   }
 }
 
@@ -21,6 +23,7 @@ export class Hud {
   constructor(state: GameState) {
     this.seed = state.seed;
     this.showPosition(state.player.x, state.player.y);
+    this.showInventory(state);
   }
 
   show(event: GameEvent) {
@@ -31,5 +34,13 @@ export class Hud {
   private showPosition(x: number, y: number) {
     element("position").textContent = `${x}, ${y}`;
     element("terrain").textContent = terrainAt(this.seed, x, y);
+  }
+
+  showInventory(state: GameState) {
+    const inventory = state.collectedLetters;
+
+    element("inventory").textContent = inventory.length > 0
+      ? inventory.join(" ")
+      : "Empty";
   }
 }

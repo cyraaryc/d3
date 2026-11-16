@@ -1,5 +1,5 @@
 import { assert, assertEquals, assertNotEquals } from "@std/assert";
-import { isPassable, terrainAt } from "./mod.ts";
+import { isPassable, letterAt, terrainAt } from "./mod.ts";
 
 function sample(seed: number, originX = 0, originY = 0): string[] {
   const cells: string[] = [];
@@ -39,4 +39,45 @@ Deno.test("no seed starts walled in", () => {
     }
     assert(seen.size >= 2000, `seed ${seed} stops at ${seen.size} cells`);
   }
+});
+
+Deno.test("letters depend only on seed and coordinates", () => {
+  for (let y = -30; y < 30; y++) {
+    for (let x = -30; x < 30; x++) {
+      assertEquals(
+        letterAt(121, x, y),
+        letterAt(121, x, y),
+      );
+    }
+  }
+});
+
+Deno.test("impassable terrain never contains letters", () => {
+  for (let y = -30; y < 30; y++) {
+    for (let x = -30; x < 30; x++) {
+      if (!isPassable(terrainAt(121, x, y))) {
+        assertEquals(letterAt(121, x, y), null);
+      }
+    }
+  }
+});
+
+Deno.test("letters are sparse across the world", () => {
+  let passableCells = 0;
+  let letterCells = 0;
+
+  for (let y = -50; y < 50; y++) {
+    for (let x = -50; x < 50; x++) {
+      if (!isPassable(terrainAt(121, x, y))) continue;
+
+      passableCells++;
+      if (letterAt(121, x, y) !== null) letterCells++;
+    }
+  }
+
+  assert(letterCells > 0, "the world should contain some letters");
+  assert(
+    letterCells < passableCells * 0.15,
+    "letters should be sparse",
+  );
 });
