@@ -14,4 +14,5 @@ export const RECIPES: Recipe[] = [
   { id: "boat", name: "Boat", letters: "BOAT", emoji: "🛶" },
   { id: "food", name: "Food", letters: "FOOD", emoji: "🍎" },
   { id: "rope", name: "Rope", letters: "ROPE", emoji: "🪢" },
+  { id: "pickaxe", name: "Pickaxe", letters: "PICKAXE", emoji: "⛏️" },
 ];
