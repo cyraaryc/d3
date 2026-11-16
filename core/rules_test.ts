@@ -144,3 +144,102 @@ Deno.test("the same letter cell cannot be collected twice", () => {
   assertEquals(state.collectedLetters.length, 1);
   assertEquals(state.collectedCells.length, 1);
 });
+
+Deno.test("crafting succeeds with the required letters", () => {
+  const state: GameState = {
+    seed: SEED,
+    player: { x: 0, y: 0 },
+    collectedCells: [],
+    collectedLetters: ["F", "O", "O", "D", "K"],
+    craftedItems: [],
+  };
+
+  const events = apply(state, { type: "craft", recipeId: "food" });
+
+  assertEquals(events, [{
+    type: "crafted",
+    recipeId: "food",
+    emoji: "🍎",
+  }]);
+  assertEquals(state.collectedLetters, ["K"]);
+  assertEquals(state.craftedItems, ["food"]);
+});
+
+Deno.test("crafting works regardless of letter order", () => {
+  const state: GameState = {
+    seed: SEED,
+    player: { x: 0, y: 0 },
+    collectedCells: [],
+    collectedLetters: ["D", "O", "F", "O"],
+    craftedItems: [],
+  };
+
+  const events = apply(state, { type: "craft", recipeId: "food" });
+
+  assertEquals(events[0].type, "crafted");
+  assertEquals(state.collectedLetters, []);
+  assertEquals(state.craftedItems, ["food"]);
+});
+
+Deno.test("crafting fails without enough letters and consumes nothing", () => {
+  const state: GameState = {
+    seed: SEED,
+    player: { x: 0, y: 0 },
+    collectedCells: [],
+    collectedLetters: ["F", "O", "D"],
+    craftedItems: [],
+  };
+
+  const events = apply(state, { type: "craft", recipeId: "food" });
+
+  assertEquals(events, [{
+    type: "craft-failed",
+    recipeId: "food",
+    reason: "missing-letters",
+  }]);
+  assertEquals(state.collectedLetters, ["F", "O", "D"]);
+  assertEquals(state.craftedItems, []);
+});
+
+Deno.test("crafting fails for an unknown recipe", () => {
+  const state: GameState = {
+    seed: SEED,
+    player: { x: 0, y: 0 },
+    collectedCells: [],
+    collectedLetters: ["K", "E", "Y"],
+    craftedItems: [],
+  };
+
+  const events = apply(state, {
+    type: "craft",
+    recipeId: "unknown",
+  });
+
+  assertEquals(events, [{
+    type: "craft-failed",
+    recipeId: "unknown",
+    reason: "unknown-recipe",
+  }]);
+  assertEquals(state.collectedLetters, ["K", "E", "Y"]);
+  assertEquals(state.craftedItems, []);
+});
+
+Deno.test("an already owned item cannot be crafted again", () => {
+  const state: GameState = {
+    seed: SEED,
+    player: { x: 0, y: 0 },
+    collectedCells: [],
+    collectedLetters: ["F", "O", "O", "D"],
+    craftedItems: ["food"],
+  };
+
+  const events = apply(state, { type: "craft", recipeId: "food" });
+
+  assertEquals(events, [{
+    type: "craft-failed",
+    recipeId: "food",
+    reason: "already-owned",
+  }]);
+  assertEquals(state.collectedLetters, ["F", "O", "O", "D"]);
+  assertEquals(state.craftedItems, ["food"]);
+});
