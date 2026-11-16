@@ -12,6 +12,17 @@ function describe(event: GameEvent): string {
       return `blocked by ${event.terrain} at ${event.toward.x}, ${event.toward.y}`;
     case "collected":
       return `collected letter ${event.letter}`;
+    case "crafted":
+      return `crafted ${event.emoji}`;
+    case "craft-failed":
+      switch (event.reason) {
+        case "unknown-recipe":
+          return "unknown recipe";
+        case "missing-letters":
+          return "not enough letters";
+        case "already-owned":
+          return "you already own this item";
+      }
   }
 }
 

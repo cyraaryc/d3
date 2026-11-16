@@ -84,6 +84,9 @@ export class GridView extends Phaser.Scene {
         return this.bump(event.at, event.toward);
       case "collected":
         return Promise.resolve();
+      case "crafted":
+      case "craft-failed":
+        return Promise.resolve();
       default:
         event satisfies never;
         return Promise.resolve();

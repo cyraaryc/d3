@@ -2,6 +2,7 @@
 // once, and the events it returns are a record of what happened. Whoever called
 // apply() decides how, or whether, to show them over time.
 
+import { RECIPES } from "./recipes.ts";
 import { isPassable, letterAt, type Terrain, terrainAt } from "./terrain.ts";
 
 export type Cell = { x: number; y: number };
@@ -19,13 +20,21 @@ export type GameState = {
 };
 
 // Command: https://gameprogrammingpatterns.com/command.html
-export type Command = { type: "move"; direction: Direction };
+export type Command =
+  | { type: "move"; direction: Direction }
+  | { type: "craft"; recipeId: string };
 
 // Domain Event: https://martinfowler.com/eaaDev/DomainEvent.html
 export type GameEvent =
   | { type: "moved"; from: Cell; to: Cell }
   | { type: "blocked"; at: Cell; toward: Cell; terrain: Terrain }
-  | { type: "collected"; at: Cell; letter: string };
+  | { type: "collected"; at: Cell; letter: string }
+  | { type: "crafted"; recipeId: string; emoji: string }
+  | {
+    type: "craft-failed";
+    recipeId: string;
+    reason: "unknown-recipe" | "missing-letters" | "already-owned";
+  };
 
 const STEPS: Record<Direction, Cell> = {
   north: { x: 0, y: -1 },
@@ -50,6 +59,8 @@ export function apply(state: GameState, command: Command): GameEvent[] {
   switch (command.type) {
     case "move":
       return move(state, command.direction);
+    case "craft":
+      return craft(state, command.recipeId);
   }
 }
 
@@ -62,9 +73,11 @@ function move(state: GameState, direction: Direction): GameEvent[] {
   const from = { ...state.player };
   const to = { x: from.x + step.x, y: from.y + step.y };
   const terrain = terrainAt(state.seed, to.x, to.y);
+
   if (!isPassable(terrain)) {
     return [{ type: "blocked", at: from, toward: to, terrain }];
   }
+
   state.player.x = to.x;
   state.player.y = to.y;
 
@@ -87,4 +100,54 @@ function move(state: GameState, direction: Direction): GameEvent[] {
   }
 
   return events;
+}
+
+function craft(state: GameState, recipeId: string): GameEvent[] {
+  const recipe = RECIPES.find((item) => item.id === recipeId);
+
+  if (!recipe) {
+    return [{
+      type: "craft-failed",
+      recipeId,
+      reason: "unknown-recipe",
+    }];
+  }
+
+  // Do not craft an item the player already owns.
+  if (state.craftedItems.includes(recipe.id)) {
+    return [{
+      type: "craft-failed",
+      recipeId,
+      reason: "already-owned",
+    }];
+  }
+
+  // Work with a copy so failed crafting never consumes letters.
+  const available = [...state.collectedLetters];
+
+  for (const letter of recipe.letters) {
+    const index = available.indexOf(letter);
+
+    if (index === -1) {
+      return [{
+        type: "craft-failed",
+        recipeId,
+        reason: "missing-letters",
+      }];
+    }
+
+    available.splice(index, 1);
+  }
+
+  // Consume the required letters.
+  state.collectedLetters = available;
+
+  // Add the crafted item to the inventory.
+  state.craftedItems.push(recipe.id);
+
+  return [{
+    type: "crafted",
+    recipeId: recipe.id,
+    emoji: recipe.emoji,
+  }];
 }
