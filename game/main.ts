@@ -27,3 +27,9 @@ controller.onSettled = () => hud.showInventory(state);
 Object.assign(globalThis, {
   game: { state, grid, hud, sounds, presenter, controller },
 });
+
+const crafting = document.getElementById("crafting") as HTMLInputElement;
+crafting?.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter") return;
+  controller.craft(crafting.value);
+});

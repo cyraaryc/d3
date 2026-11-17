@@ -52,7 +52,10 @@ export class Controller {
       direction !== ARROWS[event.key]
     );
   }
-
+  craft(recipeId: string) {
+    this.pressed = { type: "craft", recipeId };
+    this.next();
+  }
   private next() {
     // While the presenter is busy, input waits and the core hears nothing. The
     // busy state lives here in game/: the core never learns about animation.
