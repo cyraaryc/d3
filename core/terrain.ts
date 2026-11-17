@@ -18,7 +18,33 @@ export function isPassable(terrain: Terrain): boolean {
   return terrain !== "water" && terrain !== "rock";
 }
 
-const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const LETTERS: [string, number][] = [
+  ["E", .19],
+  ["S", .27],
+  ["I", .34],
+  ["A", .41],
+  ["R", .48],
+  ["N", .54],
+  ["T", .60],
+  ["O", .65],
+  ["L", .70],
+  ["C", .74],
+  ["D", .78],
+  ["U", .80],
+  ["G", .84],
+  ["P", .86],
+  ["M", .88],
+  ["H", .90],
+  ["B", .92],
+  ["Y", .94],
+  ["F", .94],
+  ["V", .95],
+  ["K", .96],
+  ["Z", .97],
+  ["X", .98],
+  ["J", .99],
+  ["Q", 1],
+];
 
 /**
  * Returns the letter at a world coordinate, or null if there is none.
@@ -37,9 +63,11 @@ export function letterAt(
   // Only 8% of passable cells contain a letter.
   if (chance >= 0.08) return null;
 
-  const index = Math.floor(noise(seed + 4, x, y, 1) * LETTERS.length);
-
-  return LETTERS[index];
+  const index = noise(seed + 4, x, y, 1);
+  for (const [letter, weight] of LETTERS) {
+    if (index < weight) return letter;
+  }
+  return "BUGGED";
 }
 
 // Value noise: random numbers at coarse grid points, blended between them, so
