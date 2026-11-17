@@ -4,6 +4,7 @@ import { startGridView } from "./grid/grid_view.ts";
 import { Hud } from "./hud.ts";
 import { Presenter } from "./presenter.ts";
 import { Sounds } from "./sounds.ts";
+import { RECIPES } from "../core/recipes.ts";
 
 // Where everything is wired together, and the only file that knows every part.
 // Hexagonal Architecture (the core inside; keys , grid, HUD, sound, and tests around
@@ -33,3 +34,8 @@ crafting?.addEventListener("keydown", (event) => {
   if (event.key !== "Enter") return;
   controller.craft(crafting.value);
 });
+const recipelist = document.getElementById("recipeList") as HTMLHeadingElement;
+for (const key of RECIPES.keys()) {
+  const value = RECIPES[key]["name"];
+  recipelist.innerHTML += value + "<br>";
+}
