@@ -1,4 +1,5 @@
 import { type GameEvent, type GameState, terrainAt } from "../core/mod.ts";
+import { RECIPES } from "../core/recipes.ts";
 
 function element(id: string): HTMLElement {
   return document.getElementById(id)!;
@@ -49,6 +50,15 @@ export class Hud {
 
   showInventory(state: GameState) {
     const inventory = state.collectedLetters;
+    const itemInventory = state.craftedItems;
+    const emojiList: string[] = [];
+    for (const i of itemInventory) {
+      const emoji = RECIPES.find((item) => item.id === i)?.emoji;
+      if (emoji) emojiList.push(emoji);
+      element("itemInventory").textContent = itemInventory.length > 0
+        ? emojiList.join()
+        : "Empty";
+    }
 
     element("inventory").textContent = inventory.length > 0
       ? inventory.join(" ")
