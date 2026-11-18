@@ -14,8 +14,17 @@ export function terrainAt(seed: number, x: number, y: number): Terrain {
   return noise(seed + 2, x, y, 6) < 0.45 ? "forest" : "grass";
 }
 
-export function isPassable(terrain: Terrain): boolean {
-  return terrain !== "water" && terrain !== "rock";
+export function isPassable(terrain: Terrain, inventory: string[]): boolean {
+  switch (terrain) {
+    case "grass":
+      return true;
+    case "forest":
+      return inventory.includes("axe");
+    case "water":
+      return inventory.includes("boat");
+    case "rock":
+      return inventory.includes("pickaxe");
+  }
 }
 
 const LETTERS: [string, number][] = [
@@ -36,7 +45,7 @@ const LETTERS: [string, number][] = [
   ["M", .88],
   ["H", .90],
   ["B", .92],
-  ["Y", .94],
+  ["Y", .93],
   ["F", .94],
   ["V", .95],
   ["K", .96],
@@ -56,7 +65,7 @@ export function letterAt(
   x: number,
   y: number,
 ): string | null {
-  if (!isPassable(terrainAt(seed, x, y))) return null;
+  if (!isPassable(terrainAt(seed, x, y), [])) return null;
 
   const chance = noise(seed + 3, x, y, 1);
 

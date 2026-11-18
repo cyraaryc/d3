@@ -3,7 +3,7 @@
 // apply() decides how, or whether, to show them over time.
 
 import { RECIPES } from "./recipes.ts";
-import { letterAt, type Terrain, terrainAt } from "./terrain.ts";
+import { isPassable, letterAt, type Terrain, terrainAt } from "./terrain.ts";
 
 export type Cell = { x: number; y: number };
 
@@ -74,12 +74,7 @@ function move(state: GameState, direction: Direction): GameEvent[] {
   const to = { x: from.x + step.x, y: from.y + step.y };
   const terrain = terrainAt(state.seed, to.x, to.y);
 
-  const canEnter = terrain === "grass" ||
-    (terrain === "forest" && state.craftedItems.includes("axe")) ||
-    (terrain === "water" && state.craftedItems.includes("boat")) ||
-    (terrain === "rock" && state.craftedItems.includes("pickaxe"));
-
-  if (!canEnter) {
+  if (!isPassable(terrain, state.craftedItems)) {
     return [{ type: "blocked", at: from, toward: to, terrain }];
   }
 

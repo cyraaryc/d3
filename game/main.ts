@@ -1,10 +1,9 @@
-import { newGame } from "../core/mod.ts";
+import { newGame, RECIPES } from "../core/mod.ts";
 import { Controller } from "./controller.ts";
 import { startGridView } from "./grid/grid_view.ts";
 import { Hud } from "./hud.ts";
 import { Presenter } from "./presenter.ts";
 import { Sounds } from "./sounds.ts";
-import { RECIPES } from "../core/recipes.ts";
 
 // Where everything is wired together, and the only file that knows every part.
 // Hexagonal Architecture (the core inside; keys , grid, HUD, sound, and tests around

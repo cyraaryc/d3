@@ -32,7 +32,7 @@ Deno.test("no seed starts walled in", () => {
       for (const next of [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]) {
         const key = next.join();
         if (seen.has(key)) continue;
-        if (!isPassable(terrainAt(seed, next[0], next[1]))) continue;
+        if (!isPassable(terrainAt(seed, next[0], next[1]), [])) continue;
         seen.add(key);
         frontier.push({ x: next[0], y: next[1] });
       }
@@ -55,7 +55,7 @@ Deno.test("letters depend only on seed and coordinates", () => {
 Deno.test("impassable terrain never contains letters", () => {
   for (let y = -30; y < 30; y++) {
     for (let x = -30; x < 30; x++) {
-      if (!isPassable(terrainAt(121, x, y))) {
+      if (!isPassable(terrainAt(121, x, y), [])) {
         assertEquals(letterAt(121, x, y), null);
       }
     }
@@ -68,7 +68,7 @@ Deno.test("letters are sparse across the world", () => {
 
   for (let y = -50; y < 50; y++) {
     for (let x = -50; x < 50; x++) {
-      if (!isPassable(terrainAt(121, x, y))) continue;
+      if (!isPassable(terrainAt(121, x, y), [])) continue;
 
       passableCells++;
       if (letterAt(121, x, y) !== null) letterCells++;

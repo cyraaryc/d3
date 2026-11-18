@@ -1,5 +1,9 @@
-import { type GameEvent, type GameState, terrainAt } from "../core/mod.ts";
-import { RECIPES } from "../core/recipes.ts";
+import {
+  type GameEvent,
+  type GameState,
+  RECIPES,
+  terrainAt,
+} from "../core/mod.ts";
 
 function element(id: string): HTMLElement {
   return document.getElementById(id)!;
@@ -55,11 +59,10 @@ export class Hud {
     for (const i of itemInventory) {
       const emoji = RECIPES.find((item) => item.id === i)?.emoji;
       if (emoji) emojiList.push(emoji);
-      element("itemInventory").textContent = itemInventory.length > 0
-        ? emojiList.join()
-        : "Empty";
     }
-
+    element("itemInventory").textContent = itemInventory.length > 0
+      ? emojiList.join()
+      : "Empty";
     element("inventory").textContent = inventory.length > 0
       ? inventory.join(" ")
       : "Empty";
