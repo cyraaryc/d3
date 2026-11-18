@@ -19,6 +19,10 @@ function describe(event: GameEvent): string {
       return `collected letter ${event.letter}`;
     case "crafted":
       return `crafted ${event.emoji}`;
+    case "gathered":
+      return "gathered";
+    case "not-gathered":
+      return "not gathered";
     case "craft-failed":
       switch (event.reason) {
         case "unknown-recipe":

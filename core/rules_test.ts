@@ -148,10 +148,10 @@ Deno.test("moving onto a letter cell collects its letter", () => {
     {
       type: "moved",
       from: { x, y },
-      to: target,
+      to: target!,
     },
     {
-      type: "collected",
+      type: "gathered",
       at: target,
       letter: letter!,
     },
@@ -169,7 +169,7 @@ Deno.test("the same letter cell cannot be collected twice", () => {
 
   const events = apply(state, { type: "move", direction: "east" });
 
-  assertEquals(events.length, 1);
+  assertEquals(events[1].type, "not-gathered");
   assertEquals(events[0].type, "moved");
   assertEquals(state.collectedLetters.length, 1);
   assertEquals(state.collectedCells.length, 1);

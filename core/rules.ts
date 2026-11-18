@@ -22,7 +22,8 @@ export type GameState = {
 // Command: https://gameprogrammingpatterns.com/command.html
 export type Command =
   | { type: "move"; direction: Direction }
-  | { type: "craft"; recipeId: string };
+  | { type: "craft"; recipeId: string }
+  | { type: "gather" };
 
 // Domain Event: https://martinfowler.com/eaaDev/DomainEvent.html
 export type GameEvent =
@@ -30,6 +31,8 @@ export type GameEvent =
   | { type: "blocked"; at: Cell; toward: Cell; terrain: Terrain }
   | { type: "collected"; at: Cell; letter: string }
   | { type: "crafted"; recipeId: string; emoji: string }
+  | { type: "gathered"; at: Cell; letter: string }
+  | { type: "not-gathered"; at: Cell }
   | {
     type: "craft-failed";
     recipeId: string;
@@ -61,6 +64,8 @@ export function apply(state: GameState, command: Command): GameEvent[] {
       return move(state, command.direction);
     case "craft":
       return craft(state, command.recipeId);
+    case "gather":
+      return gather(state);
   }
 }
 
@@ -81,25 +86,23 @@ function move(state: GameState, direction: Direction): GameEvent[] {
   state.player.x = to.x;
   state.player.y = to.y;
 
-  const events: GameEvent[] = [{ type: "moved", from, to }];
-
-  const cellKey = `${to.x},${to.y}`;
-
-  if (!state.collectedCells.includes(cellKey)) {
-    const letter = letterAt(state.seed, to.x, to.y);
-
-    if (letter !== null) {
-      state.collectedCells.push(cellKey);
-      state.collectedLetters.push(letter);
-      events.push({
-        type: "collected",
-        at: { ...to },
-        letter,
-      });
-    }
-  }
-
+  const events: GameEvent[] = [{ type: "moved", from: from, to: to }];
+  events.push(...gather(state));
   return events;
+}
+function gather(state: GameState): GameEvent[] {
+  const location = { ...state.player };
+  const cellKey = `${location.x},${location.y}`;
+  if (state.collectedCells.includes(cellKey)) {
+    return [{ type: "not-gathered", at: location }];
+  }
+  const letter = letterAt(state.seed, location.x, location.y);
+  if (letter == null) {
+    return [];
+  }
+  state.collectedCells.push(cellKey);
+  state.collectedLetters.push(letter);
+  return [{ type: "gathered", at: location, letter: letter }];
 }
 
 function craft(state: GameState, recipeId: string): GameEvent[] {
