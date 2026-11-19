@@ -17,6 +17,7 @@ export type GameState = {
   collectedCells: string[];
   collectedLetters: string[];
   craftedItems: string[];
+  gameOver: boolean;
 };
 
 // Command: https://gameprogrammingpatterns.com/command.html
@@ -28,6 +29,7 @@ export type Command =
 // Domain Event: https://martinfowler.com/eaaDev/DomainEvent.html
 export type GameEvent =
   | { type: "moved"; from: Cell; to: Cell }
+  | { type: "moved"; from: Cell; to: Cell }
   | { type: "blocked"; at: Cell; toward: Cell; terrain: Terrain }
   | { type: "collected"; at: Cell; letter: string }
   | { type: "crafted"; recipeId: string; emoji: string }
@@ -37,7 +39,8 @@ export type GameEvent =
     type: "craft-failed";
     recipeId: string;
     reason: "unknown-recipe" | "missing-letters" | "already-owned";
-  };
+  }
+  | { type: "end" };
 
 const STEPS: Record<Direction, Cell> = {
   north: { x: 0, y: -1 },
@@ -54,11 +57,13 @@ export function newGame(seed: number): GameState {
     collectedCells: [],
     collectedLetters: [],
     craftedItems: [],
+    gameOver: false,
   };
 }
 
 // The single way in. It updates the state it is given and returns the events.
 export function apply(state: GameState, command: Command): GameEvent[] {
+  if (state.gameOver) return [];
   switch (command.type) {
     case "move":
       return move(state, command.direction);
@@ -147,7 +152,16 @@ function craft(state: GameState, recipeId: string): GameEvent[] {
 
   // Add the crafted item to the inventory.
   state.craftedItems.push(recipe.id);
-
+  if (recipe.id === "winningcat") {
+    state.gameOver = true;
+    return [{
+      type: "crafted",
+      recipeId: recipe.id,
+      emoji: recipe.emoji,
+    }, {
+      type: "end",
+    }];
+  }
   return [{
     type: "crafted",
     recipeId: recipe.id,

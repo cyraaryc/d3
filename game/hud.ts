@@ -23,6 +23,8 @@ function describe(event: GameEvent): string {
       return "gathered";
     case "not-gathered":
       return "not gathered";
+    case "end":
+      return "game over 🎆🎆🎆🎆";
     case "craft-failed":
       switch (event.reason) {
         case "unknown-recipe":

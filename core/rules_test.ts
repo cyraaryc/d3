@@ -21,6 +21,7 @@ function besideEasternCell(passable: boolean): GameState {
         collectedCells: [],
         collectedLetters: [],
         craftedItems: [],
+        gameOver: false,
       };
     }
   }
@@ -48,6 +49,7 @@ function besideEasternLetter(): GameState {
         collectedCells: [],
         collectedLetters: [],
         craftedItems: [],
+        gameOver: false,
       };
     }
   }
@@ -71,6 +73,7 @@ function besideEasternTerrain(
         collectedCells: [],
         collectedLetters: [],
         craftedItems: [...craftedItems],
+        gameOver: false,
       };
     }
   }
@@ -186,6 +189,7 @@ Deno.test("crafting succeeds with the required letters", () => {
     collectedCells: [],
     collectedLetters: ["F", "O", "O", "D", "K"],
     craftedItems: [],
+    gameOver: false,
   };
 
   const events = apply(state, { type: "craft", recipeId: "food" });
@@ -207,6 +211,7 @@ Deno.test("crafting works regardless of letter order", () => {
     collectedCells: [],
     collectedLetters: ["D", "O", "F", "O"],
     craftedItems: [],
+    gameOver: false,
   };
 
   const events = apply(state, { type: "craft", recipeId: "food" });
@@ -223,6 +228,7 @@ Deno.test("crafting fails without enough letters and consumes nothing", () => {
     collectedCells: [],
     collectedLetters: ["F", "O", "D"],
     craftedItems: [],
+    gameOver: false,
   };
 
   const events = apply(state, { type: "craft", recipeId: "food" });
@@ -244,6 +250,7 @@ Deno.test("crafting fails for an unknown recipe", () => {
     collectedCells: [],
     collectedLetters: ["K", "E", "Y"],
     craftedItems: [],
+    gameOver: false,
   };
 
   const events = apply(state, {
@@ -268,6 +275,7 @@ Deno.test("an already owned item cannot be crafted again", () => {
     collectedCells: [],
     collectedLetters: ["F", "O", "O", "D"],
     craftedItems: ["food"],
+    gameOver: false,
   };
 
   const events = apply(state, { type: "craft", recipeId: "food" });
