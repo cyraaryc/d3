@@ -1,8 +1,14 @@
 // The only folder allowed to import Phaser, and for one job: drawing the grid.
 // Input, the HUD, sound, and the order of events all live outside it.
 import Phaser from "phaser";
-import type { Cell, GameEvent, GameState, Terrain } from "../../core/mod.ts";
-import { terrainAt } from "../../core/mod.ts";
+import {
+  Cell,
+  GameEvent,
+  GameState,
+  letterAt,
+  Terrain,
+  terrainAt,
+} from "../../core/mod.ts";
 
 export const CELL_SIZE = 32;
 const VIEW_WIDTH = 800;
@@ -11,7 +17,7 @@ const WALK_MS = 120;
 const BUMP_MS = 60;
 const MARKER_COLOR = 0xf5e6a8;
 const BUMP_COLOR = 0xe0533d;
-
+const LETTER_TILE_COLOR = 0xffD700;
 const TERRAIN_COLORS: Record<Terrain, number> = {
   grass: 0x5d9e4a,
   forest: 0x2f6b3a,
@@ -38,6 +44,7 @@ export class GridView extends Phaser.Scene {
   private readonly start: Cell;
   private ground!: Phaser.GameObjects.Graphics;
   private marker!: Phaser.GameObjects.Arc;
+  private gathered: string[] = [];
 
   constructor(state: GameState) {
     super("grid");
@@ -88,6 +95,9 @@ export class GridView extends Phaser.Scene {
       case "craft-failed":
         return Promise.resolve();
       case "gathered":
+        this.gathered.push(`${event.at.x},${event.at.y}`);
+        this.drawCellsAround(event.at);
+        return Promise.resolve();
       case "not-gathered":
         return Promise.resolve();
       default:
@@ -140,6 +150,19 @@ export class GridView extends Phaser.Scene {
           CELL_SIZE - 1,
           CELL_SIZE - 1,
         );
+
+        if (
+          !this.gathered.includes(`${x},${y}`) &&
+          letterAt(this.seed, x, y) != null
+        ) {
+          this.ground.fillStyle(LETTER_TILE_COLOR);
+          this.ground.fillRect(
+            x * CELL_SIZE,
+            y * CELL_SIZE,
+            CELL_SIZE - 1,
+            CELL_SIZE - 1,
+          );
+        }
       }
     }
   }
