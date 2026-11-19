@@ -1,28 +1,28 @@
 // The world is a pure function of a seed and coordinates. Nothing here is stored,
 // so the world can be effectively unbounded while saved state stays small.
 
-export type Terrain = "grass" | "forest" | "water" | "rock";
+export type Terrain = "wheat" | "autumnLeaves" | "stream" | "dirtMound";
 
 export function terrainAt(seed: number, x: number, y: number): Terrain {
   const raw = 0.65 * noise(seed, x, y, 9) + 0.35 * noise(seed + 1, x, y, 3);
   // Every game starts at the origin, so flatten the land there. Otherwise some
   // seeds would start inside a lake or walled into a pocket.
   const height = 0.5 + (raw - 0.5) * Math.min(1, Math.hypot(x, y) / 10);
-  if (height < 0.3) return "water";
-  if (height > 0.7) return "rock";
-  if (Math.min(1, Math.hypot(x, y) / 10) < 1) return "grass";
-  return noise(seed + 2, x, y, 6) < 0.45 ? "forest" : "grass";
+  if (height < 0.3) return "stream";
+  if (height > 0.7) return "dirtMound";
+  if (Math.min(1, Math.hypot(x, y) / 10) < 1) return "wheat";
+  return noise(seed + 2, x, y, 6) < 0.45 ? "autumnLeaves" : "wheat";
 }
 
 export function isPassable(terrain: Terrain, inventory: string[]): boolean {
   switch (terrain) {
-    case "grass":
+    case "wheat":
       return true;
-    case "forest":
+    case "autumnLeaves":
       return inventory.includes("axe");
-    case "water":
+    case "stream":
       return inventory.includes("boat");
-    case "rock":
+    case "dirtMound":
       return inventory.includes("pickaxe");
   }
 }

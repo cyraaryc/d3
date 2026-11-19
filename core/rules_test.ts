@@ -4,11 +4,11 @@ import { apply, type GameState, letterAt, terrainAt } from "./mod.ts";
 // Each test has a Given-When-Then shape: https://martinfowler.com/bliki/GivenWhenThen.html
 const SEED = 121;
 
-// Find a grass cell beside a grass or non-grass cell.
+// Find a wheat cell beside a wheat or non-wheat cell.
 function besideEasternCell(passable: boolean): GameState {
   for (let x = 2; x < 10_000; x++) {
-    const here = terrainAt(SEED, x, 0) === "grass";
-    const east = terrainAt(SEED, x + 1, 0) === "grass";
+    const here = terrainAt(SEED, x, 0) === "wheat";
+    const east = terrainAt(SEED, x + 1, 0) === "wheat";
 
     if (
       here &&
@@ -29,17 +29,17 @@ function besideEasternCell(passable: boolean): GameState {
   throw new Error("Found no suitable cell on this row.");
 }
 
-// Find a grass cell beside a grass cell containing a letter.
+// Find a wheat cell beside a wheat cell containing a letter.
 function besideEasternLetter(): GameState {
   for (let x = 2; x < 10_000; x++) {
-    const here = terrainAt(SEED, x, 0) === "grass";
-    const eastIsGrass = terrainAt(SEED, x + 1, 0) === "grass";
+    const here = terrainAt(SEED, x, 0) === "wheat";
+    const eastIswheat = terrainAt(SEED, x + 1, 0) === "wheat";
     const currentLetter = letterAt(SEED, x, 0);
     const eastLetter = letterAt(SEED, x + 1, 0);
 
     if (
       here &&
-      eastIsGrass &&
+      eastIswheat &&
       currentLetter === null &&
       eastLetter !== null
     ) {
@@ -57,13 +57,13 @@ function besideEasternLetter(): GameState {
   throw new Error("Found no suitable letter cell on this row.");
 }
 
-// Find a grass cell beside a specific type of terrain.
+// Find a wheat cell beside a specific type of terrain.
 function besideEasternTerrain(
-  targetTerrain: "forest" | "water" | "rock",
+  targetTerrain: "autumnLeaves" | "stream" | "dirtMound",
   craftedItems: string[] = [],
 ): GameState {
   for (let x = 2; x < 10_000; x++) {
-    const here = terrainAt(SEED, x, 0) === "grass";
+    const here = terrainAt(SEED, x, 0) === "wheat";
     const east = terrainAt(SEED, x + 1, 0) === targetTerrain;
 
     if (here && east) {
@@ -78,7 +78,7 @@ function besideEasternTerrain(
     }
   }
 
-  throw new Error(`Found no grass cell beside ${targetTerrain}.`);
+  throw new Error(`Found no wheat cell beside ${targetTerrain}.`);
 }
 
 // --------------------------------------------------
@@ -294,8 +294,8 @@ Deno.test("an already owned item cannot be crafted again", () => {
 // Area unlocking tests
 // --------------------------------------------------
 
-Deno.test("forest blocks movement without an axe", () => {
-  const state = besideEasternTerrain("forest");
+Deno.test("autumnLeaves blocks movement without an axe", () => {
+  const state = besideEasternTerrain("autumnLeaves");
   const { x, y } = state.player;
 
   const events = apply(state, { type: "move", direction: "east" });
@@ -304,8 +304,8 @@ Deno.test("forest blocks movement without an axe", () => {
   assertEquals(events[0].type, "blocked");
 });
 
-Deno.test("an axe allows movement through forest", () => {
-  const state = besideEasternTerrain("forest", ["axe"]);
+Deno.test("an axe allows movement through autumnLeaves", () => {
+  const state = besideEasternTerrain("autumnLeaves", ["axe"]);
   const { x, y } = state.player;
 
   const events = apply(state, { type: "move", direction: "east" });
@@ -314,8 +314,8 @@ Deno.test("an axe allows movement through forest", () => {
   assertEquals(events[0].type, "moved");
 });
 
-Deno.test("water blocks movement without a boat", () => {
-  const state = besideEasternTerrain("water");
+Deno.test("stream blocks movement without a boat", () => {
+  const state = besideEasternTerrain("stream");
   const { x, y } = state.player;
 
   const events = apply(state, { type: "move", direction: "east" });
@@ -324,8 +324,8 @@ Deno.test("water blocks movement without a boat", () => {
   assertEquals(events[0].type, "blocked");
 });
 
-Deno.test("a boat allows movement through water", () => {
-  const state = besideEasternTerrain("water", ["boat"]);
+Deno.test("a boat allows movement through stream", () => {
+  const state = besideEasternTerrain("stream", ["boat"]);
   const { x, y } = state.player;
 
   const events = apply(state, { type: "move", direction: "east" });
@@ -334,8 +334,8 @@ Deno.test("a boat allows movement through water", () => {
   assertEquals(events[0].type, "moved");
 });
 
-Deno.test("rock blocks movement without a pickaxe", () => {
-  const state = besideEasternTerrain("rock");
+Deno.test("dirtMound blocks movement without a pickaxe", () => {
+  const state = besideEasternTerrain("dirtMound");
   const { x, y } = state.player;
 
   const events = apply(state, { type: "move", direction: "east" });
@@ -344,8 +344,8 @@ Deno.test("rock blocks movement without a pickaxe", () => {
   assertEquals(events[0].type, "blocked");
 });
 
-Deno.test("a pickaxe allows movement through rock", () => {
-  const state = besideEasternTerrain("rock", ["pickaxe"]);
+Deno.test("a pickaxe allows movement through dirtMound", () => {
+  const state = besideEasternTerrain("dirtMound", ["pickaxe"]);
   const { x, y } = state.player;
 
   const events = apply(state, { type: "move", direction: "east" });

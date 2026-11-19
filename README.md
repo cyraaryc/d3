@@ -1,4 +1,4 @@
-# The Letter Gane
+# Fall Cat Gane
 
 - Collect letters on the gold tiles to get items that let you traverse the map
 - Playable at cyraaryc.github.io/d3/
